@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:p_shop/providers/product.dart';
 import 'package:p_shop/providers/products.dart';
-import 'package:p_shop/screens/user_product_screen.dart';
+
 import 'package:provider/provider.dart';
 
 class EditProductScreen extends StatefulWidget {
@@ -18,7 +18,8 @@ class _EditProductScreenState extends State<EditProductScreen> {
   final _imageUrlFocus = FocusNode();
 
   final _form = GlobalKey<FormState>();
-  bool _isloading = false;
+  var _isLoading = false;
+  var _isInit = true;
   var _editProduct =
       Product(id: null, title: '', desc: '', price: 0, imageUrl: '');
   //tao doi tuong de ghi de
@@ -36,7 +37,6 @@ class _EditProductScreenState extends State<EditProductScreen> {
     super.initState();
   }
 
-  var _isInit = true;
   @override
   void didChangeDependencies() {
     if (_isInit) {
@@ -84,56 +84,48 @@ class _EditProductScreenState extends State<EditProductScreen> {
   }
 
   //save new product
-  void _saveForm() {
-    final _isValidate = _form.currentState.validate();
-    if (!_isValidate) {
+  Future<void> _saveForm() async {
+    final isValid = _form.currentState.validate();
+    if (!isValid) {
       return;
     }
     _form.currentState.save();
     setState(() {
-      _isloading = true;
+      _isLoading = true;
     });
     if (_editProduct.id != null) {
-      Provider.of<Products>(context, listen: false)
+      await Provider.of<Products>(context, listen: false)
           .updateProduct(_editProduct.id, _editProduct);
-      setState(() {
-        _isloading = false;
-      });
-      Navigator.of(context).pop();
     } else {
-      Provider.of<Products>(context, listen: false)
-          .addProduct(_editProduct)
-          .catchError(
-        (error) {
-          return showDialog(
-            context: context,
-            builder: (ctx) => AlertDialog(
-              title: Text('An error occurrend !'),
-              content: Text('Something went wrong.'),
-              actions: [
-                // ignore: deprecated_member_use
-                FlatButton(
-                  child: Text('Ok'),
-                  onPressed: () {
-                    Navigator.of(ctx)
-                        .pushReplacementNamed(UserProductScreen.routeName);
-                  },
-                ),
-              ],
-            ),
-          );
-        },
-      ).then(
-        (_) {
-          setState(() {
-            _isloading = false;
-          });
-          Navigator.of(context).pop();
-        },
-      );
+      try {
+        await Provider.of<Products>(context, listen: false)
+            .addProduct(_editProduct);
+      } catch (error) {
+        await showDialog(
+          context: context,
+          builder: (ctx) => AlertDialog(
+            title: Text('An error occurred!'),
+            content: Text('Something went wrong.'),
+            actions: <Widget>[
+              FlatButton(
+                child: Text('Okay'),
+                onPressed: () {
+                  Navigator.of(ctx).pop();
+                },
+              )
+            ],
+          ),
+        );
+      }
     }
+    setState(() {
+      _isLoading = false;
+    });
+    Navigator.of(context).pop();
+    // Navigator.of(context).pop();
   }
 
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -145,7 +137,7 @@ class _EditProductScreenState extends State<EditProductScreen> {
           ),
         ],
       ),
-      body: _isloading
+      body: _isLoading
           ? Center(
               child: CircularProgressIndicator(
                 color: Colors.grey,

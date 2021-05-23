@@ -37,9 +37,9 @@ class _OrderCardState extends State<OrderCard> {
           if (_expanded)
             Container(
               margin: EdgeInsets.only(left: 8, right: 8),
-              height: min(widget.order.product.length * 20.0 + 100, 180),
+              height: min(widget.order.products.length * 20.0 + 100, 180),
               child: ListView(
-                children: widget.order.product
+                children: widget.order.products
                     .map(
                       (prod) => Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
