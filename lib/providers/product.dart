@@ -8,7 +8,9 @@ class Product with ChangeNotifier {
   final String title;
   final String desc;
   final double price;
+
   final String imageUrl;
+
   bool isFavorite;
 
   Product(
@@ -24,19 +26,17 @@ class Product with ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> toggleFavoriteStatus() async {
+  Future<void> toggleFavoriteStatus(String token, String userId) async {
     final oldStatus = isFavorite;
     isFavorite = !isFavorite;
     notifyListeners();
     final url =
-        'https://myshop-b6092-default-rtdb.firebaseio.com/products/$id.json';
+        'https://myshop-b6092-default-rtdb.firebaseio.com/userFavorite/$userId/$id.json?auth=$token';
     try {
-      final response = await http.patch(
+      final response = await http.put(
         Uri.parse(url),
         body: json.encode(
-          {
-            'isfavorite': isFavorite,
-          },
+          isFavorite,
         ),
       );
       if (response.statusCode >= 400) {

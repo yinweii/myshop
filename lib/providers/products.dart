@@ -53,6 +53,11 @@ class Products with ChangeNotifier {
     //       'https://icapi.org/wp-content/uploads/2019/10/anh-gai-xinh-deo-kinh-12.jpg',
     // ),
   ];
+  // authtoken
+  final String authToken;
+  final String userId;
+
+  Products(this.authToken, this.userId, this._items);
   var _showFavoriteOnly = false;
   //find favorite product
   List<Product> get items {
@@ -74,9 +79,16 @@ class Products with ChangeNotifier {
   }
 
 //fetch data
-  Future<void> fetchAndSetData() async {
-    const url =
-        'https://myshop-b6092-default-rtdb.firebaseio.com/products.json';
+  Future<void> fetchAndSetData([bool filterByuser = false]) async {
+    final filterString =
+        filterByuser ? 'orderBy="creatorId"&equalTo="$userId"' : '';
+    final url =
+        'https://myshop-b6092-default-rtdb.firebaseio.com/products.json?auth=$authToken&$filterString';
+    final favoriteUrl =
+        'https://myshop-b6092-default-rtdb.firebaseio.com/userFavorite/$userId.json?auth=$authToken';
+    final favoriteResponse = await http.get(Uri.parse(favoriteUrl));
+    final favoriteData = json.decode(favoriteResponse.body);
+
     try {
       final response = await http.get(
         Uri.parse(url),
@@ -92,7 +104,8 @@ class Products with ChangeNotifier {
             desc: prodData['desc'],
             price: prodData['price'],
             imageUrl: prodData['imageUrl'],
-            isFavorite: prodData['isfavorite'],
+            isFavorite:
+                favoriteData == null ? false : favoriteData[prodId] ?? false,
           ),
         );
       });
@@ -108,8 +121,8 @@ class Products with ChangeNotifier {
 //add new product
   Future<void> addProduct(Product product) async {
     //_item.add(values)
-    const url =
-        'https://myshop-b6092-default-rtdb.firebaseio.com/products.json';
+    final url =
+        'https://myshop-b6092-default-rtdb.firebaseio.com/products.json?auth=$authToken';
     try {
       var response = await http.post(Uri.parse(url),
           body: jsonEncode({
@@ -117,6 +130,7 @@ class Products with ChangeNotifier {
             'desc': product.desc,
             'price': product.price,
             'imageUrl': product.imageUrl,
+            'creatorId': userId,
             'isfavorite': product.isFavorite,
           }));
 
@@ -142,7 +156,7 @@ class Products with ChangeNotifier {
     //
     if (productIndex >= 0) {
       final url =
-          'https://myshop-b6092-default-rtdb.firebaseio.com/products/$id.json';
+          'https://myshop-b6092-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
       await http.patch(Uri.parse(url),
           body: json.encode({
             'title': newProduct.title,
@@ -159,7 +173,7 @@ class Products with ChangeNotifier {
   //delete product
   Future<void> deleteProduct(String id) async {
     final url =
-        'https://myshop-b6092-default-rtdb.firebaseio.com/products/$id.json';
+        'https://myshop-b6092-default-rtdb.firebaseio.com/products/$id.json?auth=$authToken';
     final existingProductIndex = _items.indexWhere((prod) => prod.id == id);
     var existingProduct = _items[existingProductIndex];
     _items.removeAt(existingProductIndex);
