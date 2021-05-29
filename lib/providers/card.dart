@@ -3,12 +3,14 @@ import 'package:flutter/foundation.dart';
 class CartItem {
   final String id;
   final String title;
+  final String imageUrl;
   final int quantity;
   final double price;
 
   CartItem(
       {@required this.id,
       @required this.title,
+      @required this.imageUrl,
       @required this.quantity,
       @required this.price});
 }
@@ -34,7 +36,7 @@ class Cart with ChangeNotifier {
   }
 
 //add cart
-  void addItem(String productId, String title, double price) {
+  void addItem(String productId, String title, String imageUrl, double price) {
     if (_items.containsKey(productId)) {
       //thay doi so luong
       _items.update(
@@ -42,6 +44,7 @@ class Cart with ChangeNotifier {
         (exittingCartItem) => CartItem(
             id: exittingCartItem.id,
             title: exittingCartItem.title,
+            imageUrl: exittingCartItem.imageUrl,
             quantity: exittingCartItem.quantity + 1,
             price: exittingCartItem.price),
       );
@@ -52,6 +55,7 @@ class Cart with ChangeNotifier {
         () => CartItem(
             id: DateTime.now().toString(),
             title: title,
+            imageUrl: imageUrl,
             quantity: 1,
             price: price),
       );
@@ -78,6 +82,7 @@ class Cart with ChangeNotifier {
         (exitingCartItem) => CartItem(
             id: exitingCartItem.id,
             title: exitingCartItem.title,
+            imageUrl: exitingCartItem.imageUrl,
             quantity: exitingCartItem.quantity - 1,
             price: exitingCartItem.price),
       );

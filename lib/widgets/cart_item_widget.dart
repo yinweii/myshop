@@ -4,13 +4,14 @@ import 'package:provider/provider.dart';
 
 class CartItemBad extends StatelessWidget {
   final String id;
+  final String imageUrl;
   final String productId;
   final String title;
   final double price;
   final int quantity;
 
-  const CartItemBad(
-      this.id, this.title, this.price, this.quantity, this.productId);
+  const CartItemBad(this.id, this.productId, this.title, this.imageUrl,
+      this.price, this.quantity);
 
   @override
   Widget build(BuildContext context) {
@@ -56,7 +57,7 @@ class CartItemBad extends StatelessWidget {
           padding: const EdgeInsets.all(8.0),
           child: ListTile(
             leading: CircleAvatar(
-              child: Text('\$$price'),
+              child: Image.network(imageUrl),
             ),
             title: Text(title),
             subtitle: Text(('Total: \$${(price * quantity)}')),

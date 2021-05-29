@@ -45,10 +45,11 @@ class CartPage extends StatelessWidget {
               itemCount: cart.items.length,
               itemBuilder: (context, index) => CartItemBad(
                 cart.items.values.toList()[index].id,
+                cart.items.keys.toList()[index],
                 cart.items.values.toList()[index].title,
+                cart.items.values.toList()[index].imageUrl,
                 cart.items.values.toList()[index].price,
                 cart.items.values.toList()[index].quantity,
-                cart.items.keys.toList()[index],
               ),
             ),
           ),

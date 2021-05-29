@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:flutter/cupertino.dart';
+import 'package:p_shop/models/http_exception.dart';
 import 'package:p_shop/providers/card.dart';
 import 'package:http/http.dart' as http;
 
@@ -85,5 +86,22 @@ class Order with ChangeNotifier {
           products: cartProduct),
     );
     notifyListeners();
+  }
+
+  Future<void> deleteOrder(String id) async {
+    final url =
+        'https://myshop-b6092-default-rtdb.firebaseio.com/orders/$userId/$id.json?auth=$authToken';
+    final existingOrderIndex = _orders.indexWhere((ordeId) => ordeId.id == id);
+    var existingOrder = _orders[existingOrderIndex];
+    _orders.removeAt(existingOrderIndex);
+    notifyListeners();
+
+    final response = await http.delete(Uri.parse(url));
+    if (response.statusCode >= 400) {
+      _orders.insert(existingOrderIndex, existingOrder);
+      notifyListeners();
+      throw HttpException('Can not delete this order!');
+    }
+    existingOrder = null;
   }
 }
