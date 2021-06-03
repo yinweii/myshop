@@ -49,6 +49,7 @@ class Order with ChangeNotifier {
                 (item) => CartItem(
                   id: item['id'],
                   title: item['title'],
+                  imageUrl: item['imageUrl'],
                   quantity: item['quantity'],
                   price: item['price'],
                 ),
